@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Article Detail</title>
+    <link rel="stylesheet" href="styles/style.css">
+    <style>
+        .article-container {
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+        }
+
+        .article-heading {
+            font-size: 2rem;
+            margin-bottom: 20px;
+        }
+
+        .article-image {
+            max-width: 100%;
+            height: auto;
+            margin-bottom: 20px;
+        }
+
+        .article-content h1 {
+            font-size: 2rem;
+            margin-bottom: 20px;
+        }
+
+        .article-content p {
+            font-size: 1rem;
+            margin-bottom: 20px;
+        }
+
+        .error-message {
+            color: red;
+            text-align: center;
+            font-size: 1.2rem;
+        }
+    </style>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const urlParams = new URLSearchParams(window.location.search);
+            const articleId = urlParams.get('id');
+            const apiUrl = `http://localhost:1337/api/articles/${articleId}`;
+            const headers = {
+                'Authorization': 'Bearer d4907afd35584afb0e010333d9a639d6e65960e1c3ecdc8b23109b467734deb22a6ee3a3abacfa3969489155ed716a04f8fef1509b86b8968ea012e98f3c78768215af0f45aa9a1ea18c9eecbc470703e6fb86520cd02ecba854efbbfe4a33328365cf07e3a87f44e4915e6a9c434dccfafbe04bfe27357e838a25d4b0e5b876'
+            };
+
+            fetch(apiUrl, { headers })
+                .then(response => response.json())
+                .then(data => {
+                    const article = data.data.attributes;
+                    // document.getElementById('article-heading').innerText = article.Title;
+                    // const imageUrl = `http://localhost:1337${article.Content[2].image.url}`;
+                    // document.getElementById('article-image').src = imageUrl;
+                    // document.getElementById('article-content').innerHTML = ''; // Clear previous content
+
+                    article.Content.forEach(contentItem => {
+                        if (contentItem.type === 'heading') {
+                            const heading = document.createElement('h1');
+                            heading.innerText = contentItem.children[0].text;
+                            document.getElementById('article-content').appendChild(heading);
+                        } else if (contentItem.type === 'paragraph') {
+                            const paragraph = document.createElement('p');
+                            paragraph.innerText = contentItem.children[0].text;
+                            document.getElementById('article-content').appendChild(paragraph);
+                        } else if (contentItem.type === 'image') {
+                            const img = document.createElement('img');
+                            img.src = `http://localhost:1337${contentItem.image.url}`;
+                            img.alt = contentItem.image.alternativeText || "Article Image";
+                            img.className = "article-image";
+                            document.getElementById('article-content').appendChild(img);
+                        }
+                    });
+                })
+                .catch(error => {
+                    console.error('Error fetching article:', error);
+                    document.getElementById('article-content').innerHTML = '<p class="error-message">Error loading article. Please try again later.</p>';
+                });
+        });
+    </script>
+</head>
+<body>
+    <nav>
+        <ul>
+            <li><a href="/">Home</a></li>
+            <li><a href="/news.html">News</a></li>
+        </ul>
+    </nav>
+    <div class="article-container">
+        <div class="article-heading" id="article-heading"></div>
+        <img class="article-image" id="article-image" src="" alt="Article Image">
+        <div class="article-content" id="article-content"></div>
+    </div>
+</body>
+</html>
